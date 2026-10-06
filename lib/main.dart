@@ -3,7 +3,27 @@ import 'widgets/incident_cards.dart';
 
 enum TipoIncidente { phishing, malware, acessoNaoAutorizado, ddos, outro }
 enum Severidade { critico, alto, medio, baixo }
-enum StatusIncidente { aberto, emAndamento, resolvido }
+
+enum StatusIncidente {
+  aberto('Aberto'),
+  emAndamento('Em andamento'),
+  resolvido('Resolvido');
+
+  final String texto;
+  const StatusIncidente(this.texto);
+
+  
+  StatusIncidente get proximo {
+    switch (this) {
+      case StatusIncidente.aberto:
+        return StatusIncidente.emAndamento;
+      case StatusIncidente.emAndamento:
+        return StatusIncidente.resolvido;
+      case StatusIncidente.resolvido:
+        return StatusIncidente.aberto;
+    }
+  }
+}
 
 class Incidente {
   final String identificador;
@@ -109,19 +129,24 @@ class CentralIncidentesApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-  theme: ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.teal,
-      titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
-    ),
-  ),
-  home: Scaffold(
-    appBar: AppBar(title: const Text('Incidentes')),
-    body: ListView(
-      children: incidentes.map((i) => IncidenteCard(incidente: i)).toList(),
-    ),
-  ),
-);
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.teal,
+          titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+      ),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Incidentes')),
+        body: ListView(
+          children: incidentes
+              .map<Widget>((i) => IncidenteCard(
+                    key: ValueKey(i.identificador),
+                    incidente: i,
+                  ))
+              .toList(),
+        ),
+      ),
+    );
   }
 }

@@ -40,16 +40,7 @@ String textoSeveridade(Severidade severidade) {
         return Colors.blue;
     }
  }
-  String textoStatus(StatusIncidente status) { 
-    switch (status) {
-      case StatusIncidente.aberto:
-        return 'Aberto';
-      case StatusIncidente.emAndamento:
-        return 'Em andamento';
-      case StatusIncidente.resolvido:
-        return 'Resolvido';
-    }
-  }
+  
 
 Color corStatus(StatusIncidente status) { 
   switch (status) {
@@ -78,14 +69,37 @@ String textoTipo(TipoIncidente tipo) {
 }
 
 
-class IncidenteCard extends StatelessWidget {
+class IncidenteCard extends StatefulWidget {
   final Incidente incidente;
   const IncidenteCard({super.key, required this.incidente});
 
+
+  @override
+    State<IncidenteCard> createState() => _IncidenteCardState();
+}
+
+  class _IncidenteCardState extends State<IncidenteCard> {
+    late StatusIncidente _status;
+
+    @override
+    void initState() {
+      super.initState();
+      _status = widget.incidente.status;
+  }
+
+
+  void avancarStatus(){
+    setState((){
+      _status = _status.proximo;
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    final incidente = widget.incidente;
     final corSev = corSeveridade(incidente.severidade);
-    final corSt = corStatus(incidente.status);
+    final corSt = corStatus(_status);
 
     return Card(
       child: Padding(
@@ -115,7 +129,8 @@ class IncidenteCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     incidente.titulo,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
               ],
@@ -129,19 +144,26 @@ class IncidenteCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // linha 4: chip de status + responsável
+            // linha 4: chip de status (texto do enum, cor pela função) + responsável
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Chip(
                   label: Text(
-                    textoStatus(incidente.status),
+                    _status.texto,
                     style: TextStyle(color: corSt),
                   ),
                   backgroundColor: Colors.grey[200],
                 ),
                 Text(incidente.responsavel ?? 'Sem responsável'),
               ],
+            ),
+            const SizedBox(height: 8),
+
+            // linha 5: botão para avançar o status
+            ElevatedButton(
+              onPressed: avancarStatus,
+              child: const Text('Avançar status'),
             ),
           ],
         ),
